@@ -9,6 +9,9 @@ public class CharacterScript : MonoBehaviour
     Rigidbody rigidbody;
     bool wannaJump = false;
     int Moneys = 0;
+    public AudioSource Step;
+    public AudioSource Money;
+    public AudioSource Hit;
 
     public Text score;
 
@@ -51,7 +54,7 @@ public class CharacterScript : MonoBehaviour
     {
         AnimatorController();
 
-        Debug.DrawRay(new Vector3(transform.position.x, transform.position.y + 1, transform.position.z), Vector3.down* 1.1f,Color.red);
+        
 
         if (isGrounded())
         {
@@ -103,6 +106,8 @@ public class CharacterScript : MonoBehaviour
             Moneys++;
 
             score.text = Moneys.ToString();
+
+            Money.PlayOneShot(Money.clip);
         }
     }
 
@@ -110,11 +115,22 @@ public class CharacterScript : MonoBehaviour
     {
         if(col.gameObject.CompareTag(" Obstacle"))
         {
+
             Panel.SetActive(true);
 
             life.lifeHero = false;
 
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            Hit.Play();
+
         }
+
+
+    }
+
+    public void PlayFootStep()
+    {
+        Step.Play();
+
     }
 }
