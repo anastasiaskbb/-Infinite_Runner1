@@ -1,52 +1,49 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CharacterScript : MonoBehaviour
 {
     Animator animator;
     Rigidbody rigidbody;
-    
-    public bool right_move, left_move = false;
+    bool wannaJump = false;
+    int Moneys = 0;
+
+    public Text score;
+
+    public GameObject Panel;
+
     public float targetPosition = 0;
-    public float speed = 7;
+    public float speed = 400;
     
     void Start()
     {
+
         animator = GetComponent<Animator>();
         rigidbody = GetComponent<Rigidbody>();
     }
 
     private void FixedUpdate()
     {
-        
+        rigidbody.AddForce(new Vector3(0, Physics.gravity.y * 4, 0), ForceMode.Acceleration);
 
-        if(left_move)
+        if (Input.GetKey(KeyCode.LeftArrow))
         {
+            rigidbody.AddForce(-transform.right * speed * Time.fixedDeltaTime, ForceMode.Impulse);
             
-            if(transform.position.x>=targetPosition)
-            {
-                //rigidbody.AddForce(new Vector3(-1, 0, 0)*Time.fixedDeltaTime, ForceMode.Impulse);
-                transform.Translate(new Vector3(-1, 0, 0) * Time.fixedDeltaTime*speed);
-            }
-            else
-            {
-                left_move = false;
-            }
         }
-        else if(right_move)
-        {
-            
-            if (transform.position.x <= targetPosition)
-            {
-                //rigidbody.AddForce(new Vector3(1, 0, 0) * Time.fixedDeltaTime, ForceMode.Impulse);
-                transform.Translate(new Vector3(1, 0, 0) * Time.fixedDeltaTime * speed);
-            }
-            else
-            {
-                right_move = false;
-            }
 
+        else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            rigidbody.AddForce(transform.right * speed * Time.fixedDeltaTime, ForceMode.Impulse);
+        }
+
+        if(wannaJump && isGrounded())
+        {
+
+            rigidbody.AddForce(new Vector3(0, 20, 0), ForceMode.Impulse);
+            wannaJump = false;
         }
     }
 
@@ -54,26 +51,16 @@ public class CharacterScript : MonoBehaviour
     {
         AnimatorController();
 
+        Debug.DrawRay(new Vector3(transform.position.x, transform.position.y + 1, transform.position.z), Vector3.down* 1.1f,Color.red);
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (isGrounded())
         {
-
-            if (transform.position.x > -6)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                targetPosition = transform.position.x - 6;
-                left_move = true;
-
+                wannaJump = true;
             }
         }
 
-        else if(Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            if (transform.position.x < 6)
-            {
-                targetPosition = transform.position.x + 6;
-                right_move = true;
-            }
-        }
     }
 
     void AnimatorController()
@@ -102,5 +89,32 @@ public class CharacterScript : MonoBehaviour
     }
 
 
+    bool isGrounded()
+    {
+        return Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 1, transform.position.z), Vector3.down, 1.1f);
 
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.gameObject.CompareTag("Money"))
+        {
+            Destroy(col.gameObject);
+            Moneys++;
+
+            score.text = Moneys.ToString();
+        }
+    }
+
+    void OnCollisionEnter(Collision col)
+    {
+        if(col.gameObject.CompareTag(" Obstacle"))
+        {
+            Panel.SetActive(true);
+
+            life.lifeHero = false;
+
+            gameObject.SetActive(false);
+        }
+    }
 }
